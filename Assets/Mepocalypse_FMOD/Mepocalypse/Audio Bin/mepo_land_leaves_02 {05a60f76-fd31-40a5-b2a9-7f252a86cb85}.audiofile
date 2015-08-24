@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.05.00">
+    <object class="AudioFile" id="{05a60f76-fd31-40a5-b2a9-7f252a86cb85}">
+        <property name="frequencyInKHz">
+            <value>48</value>
+        </property>
+        <property name="channelCount">
+            <value>1</value>
+        </property>
+        <property name="length">
+            <value>0.49783333333333335</value>
+        </property>
+        <property name="audioFilePath">
+            <value>$(EXTERNAL_AUDIO_DIR)/sfx/feet/mepo_land_leaves_02.wav</value>
+        </property>
+        <relationship name="container">
+            <destination>{057aa0fd-be09-4cfd-bc2f-ae50b20905c7}</destination>
+        </relationship>
+    </object>
+</objects>

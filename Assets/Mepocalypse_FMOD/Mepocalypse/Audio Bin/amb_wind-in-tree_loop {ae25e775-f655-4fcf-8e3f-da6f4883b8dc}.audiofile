@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.05.00">
+    <object class="AudioFile" id="{ae25e775-f655-4fcf-8e3f-da6f4883b8dc}">
+        <property name="frequencyInKHz">
+            <value>48</value>
+        </property>
+        <property name="channelCount">
+            <value>2</value>
+        </property>
+        <property name="length">
+            <value>14.625125000000001</value>
+        </property>
+        <property name="audioFilePath">
+            <value>$(EXTERNAL_AUDIO_DIR)/amb/amb_wind-in-tree_loop.wav</value>
+        </property>
+        <relationship name="container">
+            <destination>{ca262c52-b237-4d8c-aecc-cf8135153263}</destination>
+        </relationship>
+    </object>
+</objects>

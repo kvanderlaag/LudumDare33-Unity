@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.05.00">
+    <object class="AudioFile" id="{9903269c-0d64-4ac4-9de9-6bb0030ee112}">
+        <property name="frequencyInKHz">
+            <value>48</value>
+        </property>
+        <property name="channelCount">
+            <value>1</value>
+        </property>
+        <property name="length">
+            <value>1.1137291666666667</value>
+        </property>
+        <property name="audioFilePath">
+            <value>$(EXTERNAL_AUDIO_DIR)/amb/amb_woodpecker_05.wav</value>
+        </property>
+        <relationship name="container">
+            <destination>{ca262c52-b237-4d8c-aecc-cf8135153263}</destination>
+        </relationship>
+    </object>
+</objects>

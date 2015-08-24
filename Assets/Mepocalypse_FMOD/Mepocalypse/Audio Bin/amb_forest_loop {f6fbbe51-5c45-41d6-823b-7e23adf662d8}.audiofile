@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.05.00">
+    <object class="AudioFile" id="{f6fbbe51-5c45-41d6-823b-7e23adf662d8}">
+        <property name="frequencyInKHz">
+            <value>48</value>
+        </property>
+        <property name="channelCount">
+            <value>2</value>
+        </property>
+        <property name="length">
+            <value>60.014937500000002</value>
+        </property>
+        <property name="audioFilePath">
+            <value>$(EXTERNAL_AUDIO_DIR)/amb/amb_forest_loop.wav</value>
+        </property>
+        <relationship name="container">
+            <destination>{ca262c52-b237-4d8c-aecc-cf8135153263}</destination>
+        </relationship>
+    </object>
+</objects>

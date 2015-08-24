@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.05.00">
+    <object class="AudioFile" id="{10870d55-971e-448e-a54d-7f3ac3f10019}">
+        <property name="frequencyInKHz">
+            <value>48</value>
+        </property>
+        <property name="channelCount">
+            <value>2</value>
+        </property>
+        <property name="length">
+            <value>3.6923124999999999</value>
+        </property>
+        <property name="audioFilePath">
+            <value>$(AUDIO_BIN_DIR)/mepo_mx_forest_fight_intro {0976aa0e-c8c1-42af-a1a1-158d43f2aaa1}.wav</value>
+        </property>
+        <relationship name="container">
+            <destination>{22bfc584-f077-4a92-b383-d94f75e9f523}</destination>
+        </relationship>
+    </object>
+</objects>

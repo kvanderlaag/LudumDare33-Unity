@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.05.00">
+    <object class="AudioFile" id="{485d0cba-bb5c-4a1e-94bb-cc40b1e4d715}">
+        <property name="frequencyInKHz">
+            <value>48</value>
+        </property>
+        <property name="channelCount">
+            <value>1</value>
+        </property>
+        <property name="length">
+            <value>0.33918749999999998</value>
+        </property>
+        <property name="audioFilePath">
+            <value>$(EXTERNAL_AUDIO_DIR)/sfx/mepo/mepo_damage_03.wav</value>
+        </property>
+        <relationship name="container">
+            <destination>{ee7b4d05-f83a-4974-8376-10b71b333930}</destination>
+        </relationship>
+    </object>
+</objects>

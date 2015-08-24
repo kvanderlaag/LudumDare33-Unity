@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.05.00">
+    <object class="AudioFile" id="{01f7a3c5-b805-44f6-a468-94754b0ad028}">
+        <property name="frequencyInKHz">
+            <value>48</value>
+        </property>
+        <property name="channelCount">
+            <value>1</value>
+        </property>
+        <property name="length">
+            <value>9.2256874999999994</value>
+        </property>
+        <property name="audioFilePath">
+            <value>$(EXTERNAL_AUDIO_DIR)/sfx/chracters/snail_slime_loop.wav</value>
+        </property>
+        <relationship name="container">
+            <destination>{7c4540a4-b82e-4c54-a2df-ee43d759872e}</destination>
+        </relationship>
+    </object>
+</objects>

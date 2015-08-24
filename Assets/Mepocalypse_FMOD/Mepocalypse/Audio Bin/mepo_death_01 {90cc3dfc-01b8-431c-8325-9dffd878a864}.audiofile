@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.05.00">
+    <object class="AudioFile" id="{90cc3dfc-01b8-431c-8325-9dffd878a864}">
+        <property name="frequencyInKHz">
+            <value>48</value>
+        </property>
+        <property name="channelCount">
+            <value>1</value>
+        </property>
+        <property name="length">
+            <value>0.97414583333333338</value>
+        </property>
+        <property name="audioFilePath">
+            <value>$(EXTERNAL_AUDIO_DIR)/sfx/mepo/mepo_death_01.wav</value>
+        </property>
+        <relationship name="container">
+            <destination>{ee7b4d05-f83a-4974-8376-10b71b333930}</destination>
+        </relationship>
+    </object>
+</objects>

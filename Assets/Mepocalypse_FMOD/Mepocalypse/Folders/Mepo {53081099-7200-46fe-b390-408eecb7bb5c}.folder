@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.05.00">
+    <object class="Folder" id="{53081099-7200-46fe-b390-408eecb7bb5c}">
+        <property name="name">
+            <value>Mepo</value>
+        </property>
+        <relationship name="folder">
+            <destination>{056c853a-d6a7-4c9f-bb0f-fe9a6eb96904}</destination>
+        </relationship>
+    </object>
+</objects>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.05.00">
+    <object class="AudioFile" id="{22e96dc2-ad1a-4538-83c0-47c53bc95dd6}">
+        <property name="frequencyInKHz">
+            <value>48</value>
+        </property>
+        <property name="channelCount">
+            <value>1</value>
+        </property>
+        <property name="length">
+            <value>0.23247916666666665</value>
+        </property>
+        <property name="audioFilePath">
+            <value>$(EXTERNAL_AUDIO_DIR)/sfx/chracters/fox_sniff_05.wav</value>
+        </property>
+        <relationship name="container">
+            <destination>{7c4540a4-b82e-4c54-a2df-ee43d759872e}</destination>
+        </relationship>
+    </object>
+</objects>

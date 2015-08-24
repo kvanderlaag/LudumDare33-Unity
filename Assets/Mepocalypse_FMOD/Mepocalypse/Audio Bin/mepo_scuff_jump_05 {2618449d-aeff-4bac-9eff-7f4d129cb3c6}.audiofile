@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.05.00">
+    <object class="AudioFile" id="{2618449d-aeff-4bac-9eff-7f4d129cb3c6}">
+        <property name="frequencyInKHz">
+            <value>48</value>
+        </property>
+        <property name="channelCount">
+            <value>1</value>
+        </property>
+        <property name="length">
+            <value>0.090145833333333328</value>
+        </property>
+        <property name="audioFilePath">
+            <value>$(EXTERNAL_AUDIO_DIR)/sfx/feet/mepo_scuff_jump_05.wav</value>
+        </property>
+        <relationship name="container">
+            <destination>{057aa0fd-be09-4cfd-bc2f-ae50b20905c7}</destination>
+        </relationship>
+    </object>
+</objects>
