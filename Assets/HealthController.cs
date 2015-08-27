@@ -4,7 +4,7 @@ using System.Collections;
 
 public class HealthController : MonoBehaviour {
 
-	public PlayerControllerNew plc;
+	public PlayerController plc;
 
 	public GameObject doop1;
 	public GameObject doop2;

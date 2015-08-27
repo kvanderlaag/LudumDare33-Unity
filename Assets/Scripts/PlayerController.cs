@@ -1,267 +1,237 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent (typeof (Controller2D))]
+[RequireComponent (typeof (PlayerAnimController))]
+[RequireComponent (typeof (HurtController))]
 public class PlayerController : MonoBehaviour {
 
-	public float gravity = 0.01f;
-	public float maxJumpSpeed = 0.5f;
-	public float walkSpeed = 0.1f;
-	public float jumpSpeedMod = 1.8f;
-	public float maxFallSpeed;
+	public float hurtForce;
+	public MeshRenderer level;
 
-	bool jumpHeld;
-	int jumpTimer;
-	int fallTimer;
-	public int maxJump;
+	public int maxHealth;
+	int health;
+	bool fallen;
 
-	public float checkDistance;
+	float initX, initY;
+
+	public enum PlayerState {
+		STANDING,
+		WALKING,
+		JUMPING,
+		FALLING,
+		HURT
+	}
+
+	public bool facingRight = true;
+
+	public float jumpTime, jumpHeight;
+	float jumpVelocity, gravity;
+
+	Vector3 velocity;
+	public float moveSpeed = 10f;
+	public float maxGravity = 10f;
+
+	public float hurtTime = 0.5f;
+	float justHurt;
+	float hurtTimer = 0;
+
+	public PlayerAnimController anim;
 
 
-	enum PlayerState{
-		STANDING, 
-		JUMPING, 
-		FALLING, 
-		WALKING
-	};
-	enum Direction{
-		LEFT,
-		RIGHT
-	};
+	public PlayerState playerState;
 
-	PlayerState state;
-	Direction dir;
+	Controller2D controller;
+	HurtController hurtControl;
 
 	// Use this for initialization
 	void Start () {
-		state = PlayerState.STANDING;
-		jumpTimer = 0;
-		jumpHeld = false;
+		initX = transform.position.x;
+		initY = transform.position.y;
+		health = maxHealth;
+		hurtControl = GetComponent<HurtController> ();
+		anim = GetComponent<PlayerAnimController> ();
+		controller = GetComponent<Controller2D> ();
+		gravity = -(2 * jumpHeight) / Mathf.Pow (jumpTime, 2) / 100f;
+		jumpVelocity = Mathf.Abs(gravity) * jumpTime;
 	}
 	
 	// Update is called once per frame
-	void FixedUpdate () {
+	void Update () {
 
-		switch (state) {
-		case PlayerState.STANDING:
-			doStand();
-			break;
-		case PlayerState.JUMPING:
-			doJump();
-			break;
-		case PlayerState.WALKING:
-			doWalk();
-			break;
-		case PlayerState.FALLING:
-			doFall();
-			break;
+		checkFallen ();
+
+		if (playerState == PlayerState.HURT) {
+			hurtTimer -= Time.deltaTime;
+			if (hurtTimer <= 0) {
+				anim.ExitHurt();
+				playerState = PlayerState.STANDING;
+				justHurt = hurtTime * 0.6f;
+			}
 		}
-		checkInput ();
+		if (playerState != PlayerState.HURT) {
+			if (!controller.collisions.below && velocity.y > 0) {
+				if (!(playerState == PlayerState.JUMPING)) {
+					playerState = PlayerState.JUMPING;
+					anim.EnterJump();
+				}
+			}
+			else if (!controller.collisions.below && velocity.y < 0) {
+				if (!(playerState == PlayerState.FALLING)) {
+					playerState = PlayerState.FALLING;
+					anim.EnterFall();
+				}
+			} else if (controller.collisions.below && velocity.x != 0 ) {//&& Input.GetAxisRaw ("Horizontal") != 0) {
+				if (!(playerState == PlayerState.WALKING)) {
+					if (playerState == PlayerState.FALLING || playerState == PlayerState.JUMPING)
+						anim.playSound ("event:/SFX/Mepo/sfx_mepo_land");
+					playerState = PlayerState.WALKING;
+					anim.EnterWalk ();
+					if (velocity.x < 0 && facingRight) {
+						anim.Flip();
+						facingRight = false;
+					} else if (velocity.x > 0 && !facingRight) {
+						anim.Flip();
+						facingRight = true;
+					}
+				}
+			} else if (controller.collisions.below && velocity.x == 0) {
+				if (!(playerState == PlayerState.STANDING)) {
+					if (playerState == PlayerState.FALLING || playerState == PlayerState.JUMPING)
+						anim.playSound ("event:/SFX/Mepo/sfx_mepo_land");
+					playerState = PlayerState.STANDING;
+					anim.EnterStand ();
+				}
+			}
+		}
 
-	}
+		if (playerState == PlayerState.WALKING) {
+			if (velocity.x < 0 && facingRight) {
+				anim.Flip ();
+				facingRight = false;
+			} else if (velocity.x > 0 && !facingRight) {
+				anim.Flip ();
+				facingRight = true;
+			}
+		}
+
+		if (Input.GetButton("Cancel"))
+		    Application.Quit ();
+
+		if (controller.collisions.below || controller.collisions.above)
+			velocity.y = 0;
+
+		/* Hurt state debug code
+		if (Input.GetKey (KeyCode.H)) {
+			anim.EnterHurt ();
+			playerState = PlayerState.HURT;
+			hurtTimer = hurtTime;
+		}
+		*/
 
 
-	// Do jumping stuff
-	void doJump() {
-		if (jumpTimer < maxJump && jumpHeld && checkAbove() == 0) {
-			transform.Translate (Vector3.up * (maxJumpSpeed - (maxJumpSpeed / maxJump * jumpTimer)));
-			++jumpTimer;
+		
+		Vector2 input = new Vector2 (Input.GetAxisRaw ("Horizontal"), Input.GetAxisRaw ("Vertical"));
+		if (playerState != PlayerState.HURT) {
+			velocity.x = input.x * moveSpeed * Time.deltaTime; // * moveSpeed;
+			//velocity.x = Mathf.Clamp (velocity.x, -moveSpeed, moveSpeed); 
 		} else {
-			state = PlayerState.FALLING;
-			enterFall ();
+			if (velocity.y != 0 && velocity.x == 0) {
+				velocity.x = input.x * moveSpeed;
+			}
+			velocity.x += Mathf.Sign (velocity.x) * (gravity / 2) * Time.deltaTime;
+		}
+
+		if (Input.GetAxisRaw ("Horizontal") == 0 && playerState != PlayerState.HURT) {
+			velocity.x = 0;
+		}
+
+		velocity.y += gravity * Time.deltaTime;
+		if (Mathf.Sign (velocity.y) == -1 ) {
+			velocity.y = Mathf.Clamp (Mathf.Abs (velocity.y), 0, maxGravity) * -1f;
+		}
+
+		if (Input.GetKey (KeyCode.Space) && ( (playerState == PlayerState.STANDING || playerState == PlayerState.WALKING) )) {
+			velocity.y = jumpVelocity;
+		}
+
+		checkHurt ();
+		if (!fallen) {
+			controller.Move (velocity);
 		}
 	}
 
-	// Do standing stuff
-	void doStand() {
-		if (checkGround () == 0) {
-			state = PlayerState.FALLING;
-			enterFall ();
-		} 
-		Debug.Log ("In standing state.");
-	}
-
-	// Do falling stuff
-	void doFall() {
-		float fallSpeed = fallTimer * gravity;
-		if (checkGround () != 0) {
-			state = PlayerState.STANDING;
-			enterStand ();
-		} else {
-			transform.Translate(Vector3.down * (fallSpeed));
-			if (fallTimer < maxFallSpeed)
-				++fallTimer;
-		}
-		Debug.Log ("In falling state.");
-	}
-
-	// Do walking stuff
-	void doWalk() {
-
-
-	}
-
-	float checkGround() {
-		float fallSpeed = fallTimer * gravity;
-		if (fallSpeed == 0)
-			fallSpeed = checkDistance;
-		Collider2D col = GetComponent<Collider2D>();
-		Vector2 centre = new Vector2 (col.bounds.center.x, col.bounds.center.y - col.bounds.extents.y);
-		Vector2 left = new Vector2 (col.bounds.center.x - col.bounds.extents.x * 0.95f, col.bounds.center.y - col.bounds.extents.y);
-		Vector2 right = new Vector2 (col.bounds.center.x + col.bounds.extents.x * 0.95f, col.bounds.center.y - col.bounds.extents.y);
-		Vector2 feetC = centre - new Vector2(0.0f, fallSpeed);
-		Vector2 feetL = left - new Vector2 (0.0f, fallSpeed * 0.95f);
-		Vector2 feetR = right - new Vector2 (0.0f, fallSpeed * 0.95f);
-		RaycastHit2D hitC = Physics2D.Linecast (centre, feetC, 1 << LayerMask.NameToLayer ("Platforms"));
-		RaycastHit2D hitL = Physics2D.Linecast (left, feetL, 1 << LayerMask.NameToLayer ("Platforms"));
-		RaycastHit2D hitR = Physics2D.Linecast (right, feetR, 1 << LayerMask.NameToLayer ("Platforms"));
-		if (hitC) {
-			Debug.Log ("Collided with ground.");
-			Debug.Log (col.bounds.min.y - hitC.collider.bounds.max.y);
-			return col.bounds.min.y - hitC.collider.bounds.max.y;
-		} else if (hitL) {
-			Debug.Log ("Collided with ground.");
-			return col.bounds.min.y - hitL.collider.bounds.max.y;
-		} else if (hitR) {
-			Debug.Log ("Collided with ground.");
-			return col.bounds.min.y - hitR.collider.bounds.max.y;
-		}
-		return 0;
-	}
-
-	float checkAbove() {
-		float jumpSpeed = (maxJumpSpeed - (maxJumpSpeed / maxJump * jumpTimer));
-		if (jumpSpeed == 0)
-			jumpSpeed = checkDistance;
-		Collider2D col = GetComponent<Collider2D>();
-		Vector2 centre = new Vector2 (col.bounds.center.x, col.bounds.center.y + col.bounds.extents.y);
-		Vector2 left = new Vector2 (col.bounds.center.x - col.bounds.extents.x, col.bounds.center.y + col.bounds.extents.y);
-		Vector2 right = new Vector2 (col.bounds.center.x + col.bounds.extents.x, col.bounds.center.y + col.bounds.extents.y);
-		Vector2 feetC = centre + new Vector2(0.0f, jumpSpeed);
-		Vector2 feetL = left + new Vector2 (0.0f, jumpSpeed);
-		Vector2 feetR = right + new Vector2 (0.0f, jumpSpeed);
-		RaycastHit2D hitC = Physics2D.Linecast (centre, feetC, 1 << LayerMask.NameToLayer ("Platforms"));
-		RaycastHit2D hitL = Physics2D.Linecast (left, feetL, 1 << LayerMask.NameToLayer ("Platforms"));
-		RaycastHit2D hitR = Physics2D.Linecast (right, feetR, 1 << LayerMask.NameToLayer ("Platforms"));
-		if (hitC) {
-			Debug.Log ("Collided with ground.");
-			Debug.Log (col.bounds.min.y - hitC.collider.bounds.max.y);
-			return col.bounds.min.y - hitC.collider.bounds.max.y;
-		} else if (hitL) {
-			Debug.Log ("Collided with ground.");
-			return col.bounds.min.y - hitL.collider.bounds.max.y;
-		} else if (hitR) {
-			Debug.Log ("Collided with ground.");
-			return col.bounds.min.y - hitR.collider.bounds.max.y;
-		}
-		return 0;
-	}
-
-	bool checkAboveOld() {
-		Collider2D col = GetComponent<Collider2D>();
-		Vector2 centre = new Vector2 (col.bounds.center.x, col.bounds.center.y + col.bounds.extents.y);
-		Vector2 left = new Vector2 (col.bounds.center.x - col.bounds.extents.x, col.bounds.center.y + col.bounds.extents.y);
-		Vector2 right = new Vector2 (col.bounds.center.x + col.bounds.extents.x, col.bounds.center.y + col.bounds.extents.y);
-		Vector2 headC = centre + new Vector2(0.0f, checkDistance);
-		Vector2 headL = left + new Vector2 (0.0f, checkDistance);
-		Vector2 headR = right + new Vector2 (0.0f, checkDistance);
-		bool hit = Physics2D.Linecast (centre, headC, 1 << LayerMask.NameToLayer ("Platforms")) || Physics2D.Linecast (left, headL, 1 << LayerMask.NameToLayer ("Platforms")) || Physics2D.Linecast (right, headR, 1 << LayerMask.NameToLayer ("Platforms"));
-		if (hit) {
-			Debug.Log ("Collided from below.");
-			return true;
-		}
-		return false;
-	}
-
-	bool checkLeft() {
-		Collider2D col = GetComponent<Collider2D>();
-		Vector2 centre = new Vector2 (col.bounds.center.x - col.bounds.extents.x, col.bounds.center.y);
-		Vector2 top = new Vector2 (col.bounds.center.x - col.bounds.extents.x, col.bounds.center.y + col.bounds.extents.y);
-		Vector2 bottom = new Vector2 (col.bounds.center.x - col.bounds.extents.x, col.bounds.center.y - col.bounds.extents.y);
-		Vector2 edgeC = centre - new Vector2(checkDistance, 0.0f);
-		Vector2 edgeT = top - new Vector2 (checkDistance, 0.0f);
-		Vector2 edgeB = bottom - new Vector2 (checkDistance, 0.0f);
-		bool hit = Physics2D.Linecast (centre, edgeC, 1 << LayerMask.NameToLayer ("Platforms")) || Physics2D.Linecast (top, edgeT, 1 << LayerMask.NameToLayer ("Platforms")) || Physics2D.Linecast (bottom, edgeB, 1 << LayerMask.NameToLayer ("Platforms"));
-		if (hit) {
-			Debug.Log ("Collided to left.");
-			return true;
-		}
-		return false;
-	}
-
-	bool checkRight() {
-		Collider2D col = GetComponent<Collider2D>();
-		Vector2 centre = new Vector2 (col.bounds.center.x + col.bounds.extents.x, col.bounds.center.y);
-		Vector2 top = new Vector2 (col.bounds.center.x + col.bounds.extents.x, col.bounds.center.y + col.bounds.extents.y);
-		Vector2 bottom = new Vector2 (col.bounds.center.x + col.bounds.extents.x, col.bounds.center.y - col.bounds.extents.y);
-		Vector2 edgeC = centre + new Vector2(checkDistance, 0.0f);
-		Vector2 edgeT = top + new Vector2 (checkDistance, 0.0f);
-		Vector2 edgeB = bottom + new Vector2 (checkDistance, 0.0f);
-		bool hit = Physics2D.Linecast (centre, edgeC, 1 << LayerMask.NameToLayer ("Platforms")) || Physics2D.Linecast (bottom, edgeT, 1 << LayerMask.NameToLayer ("Platforms")) || Physics2D.Linecast (bottom, edgeB, 1 << LayerMask.NameToLayer ("Platforms"));
-		if (hit) {
-			Debug.Log ("Collided to right.");
-			return true;
-		}
-		return false;
-	}
-
-	void enterFall() {
-		fallTimer = 0;
-		Debug.Log ("Entered falling state.");
-	}
-
-	void enterStand() {
-		//if (checkGround () != 0) {
-		//	transform.Translate (new Vector3(0.0f, -checkGround () * 0.95f, 0.0f));
-		//}
-		Debug.Log ("Entered standing state.");
-	}
-
-	void enterJump() {
-		Debug.Log ("Entered jumping state.");
-		jumpTimer = 0;
-
-	}
-
-	void moveLeft() {
-		if (!checkLeft ()) {
-			if (state == PlayerState.JUMPING || state == PlayerState.FALLING) {
-				transform.Translate (new Vector3(-walkSpeed * jumpSpeedMod, 0.0f, 0.0f));
-			} else {
-				transform.Translate (new Vector3(-walkSpeed, 0.0f, 0.0f));
+	void checkHurt() {
+		hurtControl.HurtUpdate ();
+		if (!(playerState == PlayerState.HURT)) {
+			if (hurtControl.collisions.above || hurtControl.collisions.below || hurtControl.collisions.left || hurtControl.collisions.right) {
+				if (justHurt == 0) {
+					enterHurt();
+				}
+			}
+			
+			if (justHurt > 0) {
+				justHurt -= Time.deltaTime;
+				if (justHurt < 0)
+					justHurt = 0;
 			}
 		}
 	}
 
-	void moveRight() {
-		if (!checkRight ()) {
-			if (state == PlayerState.JUMPING || state == PlayerState.FALLING) {
-				transform.Translate (new Vector3(walkSpeed * jumpSpeedMod, 0.0f, 0.0f));
-			} else {
-				transform.Translate (new Vector3(walkSpeed, 0.0f, 0.0f));
-			}
+	void enterHurt() {
+		playerState = PlayerState.HURT;
+		--health;
+		if (health <= 0) {
+			anim.playSound ("event:/SFX/Mepo/sfx_mepo_death");
+			anim.hide();
+			Invoke ("reset", 0.5f);
 		}
-	}
-
-	void checkInput() {
-		if (Input.GetKey (KeyCode.RightArrow)) {
-			moveRight();
-			Debug.Log ("Right pressed.");
-		} else if (Input.GetKey (KeyCode.LeftArrow)) {
-			Debug.Log ("Left pressed.");
-			moveLeft();
+		int hurtDirX, hurtDirY;
+		hurtDirX = hurtDirY = 0;
+		hurtTimer = hurtTime;
+		anim.EnterHurt ();
+		if (hurtControl.collisions.above) {
+			hurtDirY = -1;
+		} else if (hurtControl.collisions.below) {
+			hurtDirY = 1;
 		}
-		if (Input.GetKey (KeyCode.Space)) {
-			jumpHeld = true;
-			if (state == PlayerState.STANDING || state == PlayerState.WALKING) {
-				state = PlayerState.JUMPING;
-				enterJump ();
-			}
-			Debug.Log ("Space pressed.");
+		if (hurtControl.collisions.left) {
+			hurtDirX = 1;
+		} else if (hurtControl.collisions.right) {
+			hurtDirX = -1;
+		}
+		
+		if (hurtDirY != 0) {
+			velocity.x = hurtForce * hurtDirX;
+			velocity.y = hurtForce * hurtDirY;
 		} else {
-			jumpHeld = false;
-			Debug.Log("Space released.");
+			velocity.x = hurtForce * hurtDirX;
+		}	
+	}
+
+	void checkFallen() {
+		if (transform.position.y < level.bounds.min.y - GetComponent<BoxCollider2D> ().bounds.extents.y) {
+			anim.hide ();
+			fallen = true;
+			health = 0;
+			anim.playSound ("event:/SFX/Mepo/sfx_mepo_death");
+			Invoke ("reset", 0.5f);
 		}
 	}
 
-	
+	void reset() {
+		transform.position = new Vector2 (initX, initY);
+		velocity = new Vector2 (0f, 0f);
+		health = maxHealth;
+		anim.show ();
+		fallen = false;
+	}
+
+	public Vector2 getVelocity() {
+		return velocity;
+	}
+
+	public int getHealth() {
+		return health;
+	}
 }

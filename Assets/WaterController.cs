@@ -8,11 +8,11 @@ public class WaterController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		offset = transform.position - background.transform.position;
+		//offset = transform.position - background.transform.position;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		transform.position = background.transform.position + offset;
+		//transform.position = background.transform.position + offset;
 	}
 }

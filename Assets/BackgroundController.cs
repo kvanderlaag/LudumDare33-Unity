@@ -2,15 +2,23 @@
 using System.Collections;
 
 public class BackgroundController : MonoBehaviour {
-	Vector3 offset;
-	public GameObject cam;
+	public Camera cam;
+	public Transform player;
 	// Use this for initialization
-	void Start () {
+	public void SetupCam () {
+		float sizeX, sizeY;
+		sizeX = GetComponent<SpriteRenderer> ().bounds.extents.x * 2f;
+		sizeY = GetComponent<SpriteRenderer> ().bounds.extents.y * 2f;
+		float camY = cam.orthographicSize * 2f;
+		float camX = cam.orthographicSize * cam.aspect * 2f;
 
+		float scaleX = camX / sizeX;
+		float scaleY = camY / sizeY;
+		transform.localScale = new Vector2 (scaleX, scaleY);
 	}
 	
 	// Update is called once per frame
-	void FixedUpdate () {
-		transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y + 1f, 0.0f);
+	public void UpdateBG () {
+		transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y, 0f);// new Vector3(cam.transform.position.x, cam.transform.position.y, 0.0f);
 	}
 }
